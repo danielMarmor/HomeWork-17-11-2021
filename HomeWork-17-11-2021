@@ -1,0 +1,124 @@
+import shelve
+
+
+class BankAccount:
+    def __init__(self, account_id, full_name_owner, balance):
+        self.account_id = account_id
+        self.full_name_owner = full_name_owner
+        self.balance = balance
+
+    def __str__(self):
+        return f'AccountId: {self.account_id} , Full Owner Name: {self.full_name_owner}, Balance = {self.balance}'
+
+    def __repr__(self):
+        return f'BankAccount({self.account_id, self.full_name_owner, self.balance})'
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if type(other) != type(self):
+            return False
+        return self.balance == other.balance
+
+    def __ne__(self, other):
+        if other is None:
+            return True
+        if type(other) != type(self):
+            return True
+        return self.balance != other.balance
+
+    def __gt__(self, other):
+        if other is None:
+            return True
+        if type(other) != type(self):
+            return True
+        return self.balance > other.balance
+
+    def __lt__(self, other):
+        if other is None:
+            return False
+        if type(other) != type(self):
+            return False
+        return self.balance < other.balance
+
+    def __add__(self, other):
+        if other is None:
+            return self
+        if type(other) != int and type(other) != float:
+            return self
+        new_balance = self.balance + other
+        return BankAccount(self.account_id, self.full_name_owner, new_balance)
+
+    def __sub__(self, other):
+        if other is None:
+            return self
+        if type(other) != int and type(other) != float:
+            return self
+        new_balance = self.balance - other
+        return BankAccount(self.account_id, self.full_name_owner, new_balance)
+
+    def __mul__(self, other):
+        if other is None:
+            return self
+        if type(other) != int and type(other) != float:
+            return self
+        new_balance = self.balance * other
+        return BankAccount(self.account_id, self.full_name_owner, new_balance)
+
+    @staticmethod
+    def get_saved_account(acc_id: str, file_name: str):
+        data_source = shelve.open(file_name)
+        is_exist_account = acc_id in data_source.keys()
+        if not is_exist_account:
+            return None
+        saved_account = data_source[acc_id]
+        account = BankAccount(saved_account['account_id'], saved_account['full_name_owner'], saved_account['balance'])
+        data_source.close()
+        return account
+
+
+def main():
+    DATA_SOURCE_NAME = 'bankAccounts.db'
+    sh = shelve.open(DATA_SOURCE_NAME)
+    sh.clear()
+
+    account1 = BankAccount('ddddd', 'Daniel Marmor', 1000)
+    account2 = BankAccount('nnnnn', 'Natalia Sverdlov', 2000)
+    account3 = BankAccount('ccccc', 'Carmel Wolff', 3000)
+    account4 = BankAccount('eeeee', 'Elena Geberger', 4000)
+
+    sh['ddddd'] = account1.__dict__
+    sh['nnnnn'] = account2.__dict__
+    sh['ccccc'] = account3.__dict__
+    sh['eeeee'] = account4.__dict__
+
+    sh.close()
+
+    while True:
+        account_id = input('Enter AccountId: (quit == 0)')
+        if account_id == '0':
+            print('Thank You!')
+            break
+        account = BankAccount.get_saved_account(account_id, DATA_SOURCE_NAME)
+        if account is None:
+            print('Account Not Exists')
+            continue
+        print(account)
+
+
+main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
